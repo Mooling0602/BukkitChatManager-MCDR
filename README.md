@@ -43,4 +43,6 @@ Conflicts with similar BukkitAPI chat management plugins, please do not use thes
 ## 注意事项
 和类似的BukkitAPI插件冲突，请不要使用这些同类型的插件。
 
-另外，如果有和依赖中作用相同的替代品插件，此MCDR插件可无缝迁移到其他类型的服务端上。
+另外，如果有和依赖中作用相同的替代品插件，此MCDR插件可无缝迁移到其他类型的服务端上；Mohist等支持BukkitAPI的混合端也可以使用。
+
+经过测试的服务端：Mohist、Paper
