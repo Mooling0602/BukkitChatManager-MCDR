@@ -22,6 +22,8 @@ Among them, `%player%` represents the playername; `%message%` represents the cha
 Conflicts with similar BukkitAPI chat management plugins, please do not use these same type of plugins!
 
 ---
+- [zh_CN]
+
 在MCDR接管BukkitAPI服务端的游戏内聊天。
 
 ## 依赖
