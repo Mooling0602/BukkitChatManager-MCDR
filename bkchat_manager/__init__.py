@@ -25,20 +25,21 @@ def on_load(server: PluginServerInterface, prev_module):
 def on_user_info(server: PluginServerInterface, info: Info):
     player = info.player
     message = info.content
-    if not info.content.startswith("!!"):
-        chat_format = config.format.chat
-        formatted_message = chat_format.replace('%player%', player).replace('%message%', message)
-        server.say(formatted_message)
-    else:
-        src_prefix = "MCDR"
-        command_format = config.format.command
-        if config.command.feedback:
-            if not config.command.broadcast:
-                formatted_message = command_format.replace('%src_prefix%', src_prefix).replace('%player%', "您").replace('%message%', message)
-                server.tell(player, formatted_message)
-        if config.command.broadcast:
-            formatted_message = command_format.replace('%src_prefix%', src_prefix).replace('%player%', player).replace('%message%', message)
-            server.broadcast(formatted_message)
+    if player is not None:
+        if not info.content.startswith("!!"):
+            chat_format = config.format.chat
+            formatted_message = chat_format.replace('%player%', player).replace('%message%', message)
+            server.say(formatted_message)
+        else:
+            src_prefix = "MCDR"
+            command_format = config.format.command
+            if config.command.feedback:
+                if not config.command.broadcast:
+                    formatted_message = command_format.replace('%src_prefix%', src_prefix).replace('%player%', "您").replace('%message%', message)
+                    server.tell(player, formatted_message)
+            if config.command.broadcast:
+                formatted_message = command_format.replace('%src_prefix%', src_prefix).replace('%player%', player).replace('%message%', message)
+                server.broadcast(formatted_message)
 
 
 def on_info(server: PluginServerInterface, info: Info):
