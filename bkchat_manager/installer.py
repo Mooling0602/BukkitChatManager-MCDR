@@ -14,6 +14,10 @@ def unpack_dependency():
         server_folder = "server"
     target_folder = f'{server_folder}/plugins'
     psi.logger.info("内置依赖项路径: " + extra_folder)
+    if os.access(extra_folder, os.R_OK):
+        psi.logger.info("路径可读")
+    else:
+        psi.logger.error("没有读取权限，无法访问依赖项路径")
     if os.path.exists(extra_folder):
         psi.logger.info("内置依赖项存在")
         for item in os.listdir(extra_folder):
