@@ -6,6 +6,7 @@ from mcdreforged.api.all import *
 psi = ServerInterface.psi()
 
 def unpack_dependency():
+    psi.logger.info("开始解压依赖...")
     plgdir = os.path.dirname(__file__)
     extra_folder = os.path.join(plgdir, 'extra')
     server_folder = psi.get_mcdr_config()["working_directory"]
