@@ -1,26 +1,11 @@
 import re
 from mcdreforged.api.all import *
-
-class formatConfig(Serializable):
-    chat: str = r'§7[服内聊天] §a%player% §6>>§r %message%'
-    command: str = r'§7[%src_prefix%] §a%player%提交了指令§6：§r %message%'
-
-class commandConfig(Serializable):
-    feedback: bool = True
-    broadcast: bool = False
-
-class mainConfig(Serializable):
-    format: formatConfig = formatConfig()
-    command: commandConfig = commandConfig()
-
-config: mainConfig
-
-def load_config(server: PluginServerInterface):
-    global config
-    config = server.load_config_simple(target_class=mainConfig)
+from bkchat_manager.config import load_config, config
+from bkchat_manager.installer import unpack_dependency
 
 def on_load(server: PluginServerInterface, prev_module):
     load_config(server)
+    unpack_dependency()
 
 def on_user_info(server: PluginServerInterface, info: Info):
     player = info.player
@@ -39,8 +24,7 @@ def on_user_info(server: PluginServerInterface, info: Info):
                     server.tell(player, formatted_message)
             if config.command.broadcast:
                 formatted_message = command_format.replace('%src_prefix%', src_prefix).replace('%player%', player).replace('%message%', message)
-                server.broadcast(formatted_message)
-
+                server.say(formatted_message)
 
 def on_info(server: PluginServerInterface, info: Info):
     if info.is_from_server and re.fullmatch(r'(.+) issued server command: (.+)', info.content):
@@ -56,4 +40,14 @@ def on_info(server: PluginServerInterface, info: Info):
                     server.tell(player, formatted_message)
             if config.command.broadcast:
                 formatted_message = command_format.replace('%src_prefix%', src_prefix).replace('%player%', player).replace('%message%', command)
-                server.broadcast(formatted_message)
+                server.say(formatted_message)
+
+def on_player_joined(server: PluginServerInterface, player: str, info: Info):
+    joinTip = config.format.join
+    formatted_joinTip = joinTip.replace('%player%', player)
+    server.say(formatted_joinTip)
+
+def on_player_left(server: PluginServerInterface, player: str):
+    leftTip = config.format.left
+    formatted_leftTip = leftTip.replace('%player%', player)
+    server.say(formatted_leftTip)

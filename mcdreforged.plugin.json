@@ -1,6 +1,6 @@
 {
   "id": "bkchat_manager",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "name": "BukkitChatManager",
   "description": {
 	"en_us": "Manage chat in game for servers use BukkitAPI.",
