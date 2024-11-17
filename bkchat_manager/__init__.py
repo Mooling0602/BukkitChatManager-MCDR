@@ -1,4 +1,5 @@
 import re
+import os
 import bkchat_manager.config
 from mcdreforged.api.all import *
 from bkchat_manager.config import load_config
