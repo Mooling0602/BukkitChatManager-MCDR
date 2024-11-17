@@ -1,13 +1,17 @@
 import re
+import bkchat_manager.config
 from mcdreforged.api.all import *
-from bkchat_manager.config import load_config, config
+from bkchat_manager.config import load_config
 from bkchat_manager.installer import unpack_dependency
 
 def on_load(server: PluginServerInterface, prev_module):
+    global config
     load_config(server)
     unpack_dependency()
+    config = bkchat_manager.config.config
 
 def on_user_info(server: PluginServerInterface, info: Info):
+    global config
     player = info.player
     message = info.content
     if player is not None:
@@ -27,6 +31,7 @@ def on_user_info(server: PluginServerInterface, info: Info):
                 server.say(formatted_message)
 
 def on_info(server: PluginServerInterface, info: Info):
+    global config
     if info.is_from_server and re.fullmatch(r'(.+) issued server command: (.+)', info.content):
         match = re.fullmatch(r'(.+) issued server command: (.+)', info.content)
         if match:
@@ -43,11 +48,13 @@ def on_info(server: PluginServerInterface, info: Info):
                 server.say(formatted_message)
 
 def on_player_joined(server: PluginServerInterface, player: str, info: Info):
+    global config
     joinTip = config.format.join
     formatted_joinTip = joinTip.replace('%player%', player)
     server.say(formatted_joinTip)
 
 def on_player_left(server: PluginServerInterface, player: str):
+    global config
     leftTip = config.format.left
     formatted_leftTip = leftTip.replace('%player%', player)
     server.say(formatted_leftTip)
