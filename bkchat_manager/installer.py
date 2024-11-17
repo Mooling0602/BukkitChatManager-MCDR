@@ -8,7 +8,7 @@ psi = ServerInterface.psi()
 def unpack_dependency():
     plgdir = os.path.dirname(__file__)
     extra_folder = os.path.join(plgdir, 'extra')
-    server_folder = psi.get_mcdr_config["working_directory"]
+    server_folder = psi.get_mcdr_config()["working_directory"]
     target_folder = f'{server_folder}/plugins'
     if os.path.exists(extra_folder):
         for item in os.listdir(extra_folder):
