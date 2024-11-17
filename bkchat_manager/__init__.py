@@ -8,7 +8,7 @@ from bkchat_manager.installer import unpack_dependency
 def on_load(server: PluginServerInterface, prev_module):
     global config
     load_config(server)
-    server.logger.info("插件工作目录：" + os.getcwd())
+    server.logger.info("插件内部目录：" + os.path.dirname(__file__))
     unpack_dependency()
     config = bkchat_manager.config.config
 
