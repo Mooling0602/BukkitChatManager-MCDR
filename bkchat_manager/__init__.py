@@ -2,13 +2,13 @@ import re
 import bkchat_manager.config
 from mcdreforged.api.all import *
 from bkchat_manager.config import load_config
-from bkchat_manager.installer import unpack_dependency
+from bkchat_manager.installer import extract_file
 
 def on_load(server: PluginServerInterface, prev_module):
     global config
     load_config(server)
-    unpack_dependency()
     config = bkchat_manager.config.config
+    extract_file()
 
 def on_user_info(server: PluginServerInterface, info: Info):
     global config
