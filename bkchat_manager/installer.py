@@ -14,6 +14,7 @@ def unpack_dependency():
         server_folder = "server"
     target_folder = f'{server_folder}/plugins'
     if os.path.exists(extra_folder):
+        psi.logger.info("内置依赖项路径: " + os.path.exists(extra_folder))
         psi.logger.info("内置依赖项存在")
         for item in os.listdir(extra_folder):
             item_path = os.path.join(extra_folder, item)
