@@ -9,7 +9,9 @@ def unpack_dependency():
     psi.logger.info("开始解压依赖...")
     plgdir = os.path.dirname(__file__)
     extra_folder = os.path.join(plgdir, 'extra')
-    server_folder = psi.get_mcdr_config()["working_directory"]
+    server_folder = psi.get_mcdr_config().get("working_directory", None)
+    if server_folder is None:
+        server_folder = "server"
     target_folder = f'{server_folder}/plugins'
     if os.path.exists(extra_folder):
         psi.logger.info("内置依赖项存在")
@@ -21,3 +23,5 @@ def unpack_dependency():
                 shutil.copy(item_path, target_path)
             else:
                 psi.logger.warning(f"依赖项[BukkitAPI插件: {item}] 已经存在于目标目录中，请尝试重启服务器以加载插件")
+    else:
+        psi.logger.info("内置依赖项不存在！！！")
