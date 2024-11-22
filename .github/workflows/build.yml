@@ -18,7 +18,7 @@ jobs:
 
       - name: 打包插件
         run: |
-          zip -r "BukkitChatManager-v0.1.0.mcdr" bkchat_manager extra LICENSE mcdreforged.plugin.json
+          zip -r "BukkitChatManager-v0.2.0.mcdr" bkchat_manager extra LICENSE mcdreforged.plugin.json requirements.txt
 
       - name: 检查构建
         run: |

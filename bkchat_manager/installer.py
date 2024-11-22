@@ -13,4 +13,4 @@ def extract_file():
     with psi.open_bundled_file('extra/PlayerLog.jar') as file_handler:
         with open(target_path, 'wb') as target_file:
             target_file.write(file_handler.read())
-            psi.logger.info("BukkitAPI插件依赖项解压完成，请重启服务器以加载插件。")
+            psi.logger.info("BukkitAPI插件依赖项解压完成，若出现玩家消息重复等异常情况，重启游戏服务端即可。")

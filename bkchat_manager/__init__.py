@@ -3,11 +3,17 @@ import bkchat_manager.config
 from mcdreforged.api.all import *
 from bkchat_manager.config import load_config
 from bkchat_manager.installer import extract_file
+from bkchat_manager.handler import CustomHandler
 
 def on_load(server: PluginServerInterface, prev_module):
     global config
     load_config(server)
     config = bkchat_manager.config.config
+    if config.builtin_handler:
+        server.logger.info("内置处理器已启用，正在尝试进行注册...")
+        server.register_server_handler(CustomHandler())
+        server.logger.warning("混用多个服务端处理器会导致错误，可以手动卸载或禁用其他服务端处理器插件！")
+        server.logger.info("如果你有适用的服务端处理器，你可以在配置文件内禁用此插件的builtin_handler，以使用该处理器")
     extract_file()
 
 def on_user_info(server: PluginServerInterface, info: Info):
