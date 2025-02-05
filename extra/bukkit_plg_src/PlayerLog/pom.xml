@@ -6,7 +6,7 @@
 
     <groupId>com.Mooling0602</groupId>
     <artifactId>PlayerLog</artifactId>
-    <version>1.0</version>
+    <version>1.1</version>
     <packaging>jar</packaging>
 
     <name>PlayerLog</name>
@@ -22,6 +22,10 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
     <build>
         <plugins>

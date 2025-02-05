@@ -1,6 +1,6 @@
 {
   "id": "bkchat_manager",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "name": "BukkitChatManager",
   "description": {
 	"en_us": "Manage chat in game for servers use BukkitAPI.",
@@ -10,5 +10,6 @@
 	"mcdreforged": ">=2.1.0"
   },
   "author": "Mooling0602",
-  "link": "https://github.com/Mooling0602/BukkitChatManager"
+  "link": "https://github.com/Mooling0602/BukkitChatManager",
+  "resources": ["extra"]
 }

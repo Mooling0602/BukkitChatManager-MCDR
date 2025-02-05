@@ -1,9 +1,12 @@
+import os
 import re
 import bkchat_manager.config
+
 from mcdreforged.api.all import *
 from bkchat_manager.config import load_config
-from bkchat_manager.installer import extract_file
+from bkchat_manager.installer import bukkit_plg_folder, extract_file
 from bkchat_manager.handler import CustomHandler
+
 
 def on_load(server: PluginServerInterface, prev_module):
     global config
@@ -14,7 +17,16 @@ def on_load(server: PluginServerInterface, prev_module):
         server.register_server_handler(CustomHandler())
         server.logger.warning("混用多个服务端处理器会导致错误，可以手动卸载或禁用其他服务端处理器插件！")
         server.logger.info("如果你有适用的服务端处理器，你可以在配置文件内禁用此插件的builtin_handler，以使用该处理器")
-    extract_file()
+    if not os.path.isfile(os.path.join(bukkit_plg_folder, 'PlayerLog-1.1.jar')):
+        server.logger.info("正在更新依赖的Bukkit插件，你可能需要重启服务端！")
+        extract_file()
+    else:
+        server.logger.info("依赖的Bukkit插件无需更新，插件将开始工作！")
+        if server.is_server_running():
+            server.execute("chatmsg off")
+
+def on_server_startup(server: PluginServerInterface):
+    server.execute("chatmsg off")
 
 def on_user_info(server: PluginServerInterface, info: Info):
     global config
