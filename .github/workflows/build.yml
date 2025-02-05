@@ -18,7 +18,7 @@ jobs:
 
       - name: 打包插件
         run: |
-          zip -r "BukkitChatManager-v0.2.0.mcdr" bkchat_manager extra/PlayerLog.jar LICENSE mcdreforged.plugin.json requirements.txt
+          zip -r "BukkitChatManager-v0.2.1.mcdr" bkchat_manager extra/PlayerLog-1.1.jar LICENSE mcdreforged.plugin.json requirements.txt
 
       - name: 检查构建
         run: |
