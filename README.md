@@ -1,39 +1,12 @@
 # BukkitChatManager-MCDR
----
-- [en_US]
-
-Manage chat in game for BukkitAPI servers in MCDR.
-
-## Dependency
-- BukkitAPI Plugin: [PlayerLog](https://github.com/Mooling0602/BukkitChatManager-MCDR/blob/main/extra/PlayerLog-1.0-SNAPSHOT.jar)
-
-## Usage
-Install need BukkitAPI plugin in **Dependency** first, 
-> Install this to disable server sent chat messages to clients by default, then the MCDR plugin can manage these messages after.
-
-then install this MCDR plugin from release.
-
-## Configuration
-Located in `config/bkchat_manager/config.json`, default config is written by zh_CN, you can edit it to feat your language.
-
-Among them, `%player%` represents the playername; `%message%` represents the chat content or commands player executed; `%src_prefix%` represents the command source, e.g. `MCDR`, `Server`.
-
-## NOTE
-Conflicts with similar BukkitAPI chat management plugins, please do not use these same type of plugins!
-
----
-- [zh_CN]
-
 在MCDR接管BukkitAPI服务端的游戏内聊天。
 
 ## 依赖
-- BukkitAPI 插件：[PlayerLog](https://github.com/Mooling0602/BukkitChatManager-MCDR/blob/main/extra/PlayerLog-1.0-SNAPSHOT.jar)
+- BukkitAPI 插件：[PlayerLog](https://github.com/Mooling0602/BukkitChatManager-MCDR/blob/main/extra/PlayerLog-1.1.jar)
+> 已附加到MCDR插件中，MCDR启动或重载此插件时会自动更新或加载，你可能需要重启服务器以使其生效！
 
 ## 用法
-先安装**依赖**部分中的BukkitAPI插件，
-> 以禁止服务端默认地向客户端发送聊天消息，然后此MCDR插件就可以接管这些消息并进行处理。
-
-然后从Release中安装此MCDR插件。
+从Release中安装此MCDR插件，如果出现问题，请确认依赖是否已经正常加载，有报错请反馈到Issues！
 
 ## 配置
 配置文件位于`config/bkchat_manager/config.json`，你可以在里面修改聊天消息的格式等。
@@ -45,4 +18,11 @@ Conflicts with similar BukkitAPI chat management plugins, please do not use thes
 
 另外，如果有和依赖中作用相同的替代品插件，此MCDR插件可无缝迁移到其他类型的服务端上；Mohist等支持BukkitAPI的混合端也可以使用。
 
-经过测试的服务端：Mohist、Paper
+## 更新内容
+### 历史日志
+- `v0.2.1` 对内置的Bukkit插件依赖进行了更新，添加了客户端聊天拦截的动态控制功能，非生产环境下可以使用/chatmsg on|off进行调试，生产环境下请禁止普通玩家的playerlog.chatmsg权限（将于后续优化）！
+### 计划中
+- `v0.3.0` 将更新兼容模式，你将可以通过安装此插件并启用聊天兼容模式的方式，使MCDR本身和MCDR的大部分按规范开发的插件，可以兼容各种会修改聊天内容并影响服务端聊天相关日志输出的Bukkit服务端插件！
+
+经过测试的服务端：Mohist、Paper、Leaves
+> 极低版本的服务端尚未测试，理论上支持1.12及以上的所有Bukkit服务端。
