@@ -3,14 +3,14 @@ name: 自动打包插件
 on:
   push:
     branches:
-      - main  # 触发打包的分支，可以根据需要修改
+      - main
   pull_request:
     branches:
-      - main  # 可以修改为触发的 PR 分支
+      - main
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # 运行环境
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout 代码
@@ -18,7 +18,7 @@ jobs:
 
       - name: 打包插件
         run: |
-          zip -r "BukkitChatManager-v0.2.1.mcdr" bkchat_manager extra/PlayerLog-1.1.jar LICENSE mcdreforged.plugin.json requirements.txt
+          zip -r "BukkitChatManager-v0.3.0.mcdr" bkchat_manager extra/PlayerLog-1.2.jar LICENSE mcdreforged.plugin.json requirements.txt
 
       - name: 检查构建
         run: |

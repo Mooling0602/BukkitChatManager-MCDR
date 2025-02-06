@@ -1,10 +1,10 @@
 {
   "id": "bkchat_manager",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "name": "BukkitChatManager",
   "description": {
 	"en_us": "Manage chat in game for servers use BukkitAPI.",
-	"zh_cn": "接管BukkitAPI服务端的游戏内聊天"
+	"zh_cn": "接管BukkitAPI服务端的游戏内聊天。"
   },
   "dependencies": {
 	"mcdreforged": ">=2.1.0"
