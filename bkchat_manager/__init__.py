@@ -31,7 +31,7 @@ def on_server_startup(server: PluginServerInterface):
         server.execute("chatmsg off")
     else:
         server.execute("chatmsg on")
-        server.logger.info("兼容模式已开启，此MCDR插件的功能将关闭，你可以使用其他可以修改聊天内容格式的服务端插件！")
+        server.logger.info("§a兼容模式已开启§r，此MCDR插件的功能将关闭，你可以使用其他可以修改聊天内容格式的服务端插件！")
         server.logger.info("控制台会产生两条内容重复的聊天日志，目前这个体验问题无法解决，但是§a此MCDR插件内置的处理器会正确进行解析，不会有负面影响！§r")
 
 def is_compatibility_mode_enabled() -> bool:

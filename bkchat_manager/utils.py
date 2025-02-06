@@ -1,3 +1,4 @@
+# 由 DeepSeek R1 生成
 from typing import Callable, Any
 
 
