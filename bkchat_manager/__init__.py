@@ -13,11 +13,10 @@ def on_load(server: PluginServerInterface, prev_module):
     global config
     load_config(server)
     config = cfg.config
-    if config.builtin_handler:
-        server.logger.info("内置处理器已启用，正在尝试进行注册...")
-        server.register_server_handler(CustomHandler())
-        server.logger.warning("混用多个服务端处理器会导致错误，可以手动卸载或禁用其他服务端处理器插件！")
-        server.logger.info("如果你有适用的服务端处理器，你可以在配置文件内禁用此插件的builtin_handler，以使用该处理器")
+    server.logger.info("内置处理器强制启用，正在尝试进行注册...")
+    server.register_server_handler(CustomHandler())
+    server.logger.warning("混用多个服务端处理器会导致错误，可以手动卸载或禁用其他服务端处理器插件！")
+    server.logger.info("若插件内置的处理器造成异常，请及时前往GitHub Issues进行反馈！")
     if not os.path.isfile(os.path.join(bukkit_plg_folder, 'PlayerLog-1.2.jar')):
         server.logger.info("正在更新依赖的Bukkit插件，你可能需要重启服务端！")
         extract_file()

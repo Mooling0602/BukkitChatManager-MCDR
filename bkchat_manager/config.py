@@ -12,7 +12,6 @@ class commandConfig(Serializable):
 
 class mainConfig(Serializable):
     compatibility_mode: bool = False
-    builtin_handler: bool = True
     format: formatConfig = formatConfig()
     command: commandConfig = commandConfig()
 
