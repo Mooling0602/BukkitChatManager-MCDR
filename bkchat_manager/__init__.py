@@ -44,8 +44,13 @@ def on_user_info(server: PluginServerInterface, info: Info):
     if player is not None:
         if not info.content.startswith("!!"):
             chat_format = config.format.chat
-            formatted_message = chat_format.replace('%player%', player).replace('%message%', message)
-            server.say(formatted_message)
+            if isinstance(chat_format, str):
+                formatted_message = chat_format.replace('%player%', player).replace('%message%', message)
+                server.say(formatted_message)
+            elif isinstance(chat_format, dict):
+                formatted_message = str(chat_format).replace("'", '"')
+                server.logger.info(formatted_message)
+                server.execute(f"tellraw @a {formatted_message}")
         else:
             src_prefix = "MCDR"
             command_format = config.format.command
