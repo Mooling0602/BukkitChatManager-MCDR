@@ -1,1 +1,17 @@
+# Python-generated files
 __pycache__/
+*.py[oc]
+build/
+dist/
+*.egg-info/
+
+# Virtual environments and tooling
+.venv/
+.ruff_cache/
+.pytest_cache/
+
+# UV
+uv.lock
+
+# MCDReforged build artifacts
+*.mcdr
