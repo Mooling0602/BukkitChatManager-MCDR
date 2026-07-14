@@ -8,20 +8,12 @@ dynamic = ["version"]
 description = "Manage in-game chat for Bukkit-based Minecraft servers through MCDReforged."
 readme = "README.md"
 license = { file = "LICENSE" }
-authors = [
-    { name = "Mooling0602" },
-]
-requires-python = ">=3.10"
-dependencies = [
-    "mcdreforged>=2.1.0",
-    "strip-ansi",
-]
+authors = [{ name = "Mooling0602" }]
+requires-python = ">=3.9"
+dependencies = ["mcdreforged>=2.1.0", "strip-ansi"]
 
 [dependency-groups]
-dev = [
-    "ruff",
-    "ty",
-]
+dev = ["ruff", "ty"]
 
 [tool.hatch.version]
 source = "regex"
@@ -32,4 +24,4 @@ pattern = '"version"\s*:\s*"(?P<version>[^"]+)"'
 packages = ["src/bkchat_manager"]
 
 [tool.ruff.lint]
-ignore = ["F403", "F405"]
+ignore = ["F403", "F405", "UP035", "UP006"]

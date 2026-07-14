@@ -1,11 +1,12 @@
 import re
-
-from strip_ansi import strip_ansi
 from typing import List
-from typing_extensions import override
-from mcdreforged.utils import string_utils
-from mcdreforged.info_reactor.info import InfoSource, Info
+
 from mcdreforged.handler.impl import BukkitHandler
+from mcdreforged.info_reactor.info import Info, InfoSource
+from mcdreforged.utils import string_utils
+from strip_ansi import strip_ansi
+from typing_extensions import override
+
 
 class CustomHandler(BukkitHandler):
     def get_name(self) -> str:
@@ -38,8 +39,11 @@ class CustomHandler(BukkitHandler):
 
     @override
     def parse_player_left(self, info: Info):
-        if not info.is_user:
-            if (m := self.__player_left_regex.fullmatch(info.content)) is not None:
-                if self._verify_player_name(m['name']):
-                    return m['name']
+        if (
+            not info.is_user
+            and isinstance(info.content, str)
+            and (m := self.__player_left_regex.fullmatch(info.content)) is not None
+            and self._verify_player_name(m['name'])
+        ):
+            return m['name']
         return None

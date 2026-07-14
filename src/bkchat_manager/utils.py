@@ -1,5 +1,7 @@
 # 由 DeepSeek R1 生成
-from typing import Callable, Any
+from __future__ import annotations
+
+from typing import Any, Callable
 
 
 def execute_if(condition: bool | Callable[[], bool]):
