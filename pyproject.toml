@@ -1,0 +1,35 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "bukkit-chat-manager"
+dynamic = ["version"]
+description = "Manage in-game chat for Bukkit-based Minecraft servers through MCDReforged."
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Mooling0602" },
+]
+requires-python = ">=3.10"
+dependencies = [
+    "mcdreforged>=2.1.0",
+    "strip-ansi",
+]
+
+[dependency-groups]
+dev = [
+    "ruff",
+    "ty",
+]
+
+[tool.hatch.version]
+source = "regex"
+path = "src/mcdreforged.plugin.json"
+pattern = '"version"\s*:\s*"(?P<version>[^"]+)"'
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/bkchat_manager"]
+
+[tool.ruff.lint]
+ignore = ["F403", "F405"]
