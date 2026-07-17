@@ -15,3 +15,9 @@ uv.lock
 
 # MCDReforged build artifacts
 *.mcdr
+
+# Agent tools
+.codex/
+.codegraph/
+.reasonix/
+.opencode/
