@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from mcdreforged.api.all import PluginServerInterface, Serializable
 
 
@@ -13,10 +15,19 @@ class commandConfig(Serializable):
     broadcast: bool = False
 
 
+class downloadConfig(Serializable):
+    file_name_regex: str = r"PlayerLog-(\d+(?:\.\d+)*)\.jar"
+    file_sha256: str = (
+        "6612167f528ed970d4feaa01de5320bfb111a32ac2f594e2e013f1cf904b272b"
+    )
+    force_hash_check: bool = True
+
+
 class mainConfig(Serializable):
-    compatibility_mode: bool = False
     format: formatConfig = formatConfig()
     command: commandConfig = commandConfig()
+    bukkit_plugin_version_limit: str = ">=2.0"  # empty to disable check
+    bukkit_plugin_management: downloadConfig = downloadConfig()
 
 
 def get_config(server: PluginServerInterface) -> mainConfig:
