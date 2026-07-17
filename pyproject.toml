@@ -9,8 +9,13 @@ description = "Manage in-game chat for Bukkit-based Minecraft servers through MC
 readme = "README.md"
 license = { file = "LICENSE" }
 authors = [{ name = "Mooling0602" }]
-requires-python = ">=3.9"
-dependencies = ["mcdreforged>=2.1.0", "strip-ansi"]
+requires-python = ">=3.12"
+dependencies = [
+    "auto-uuid-api-mcdr",
+    "mcdreforged>=2.15.0",
+    "packaging",
+    "psutil",
+]
 
 [dependency-groups]
 dev = ["ruff", "ty"]
@@ -23,5 +28,8 @@ pattern = '"version"\s*:\s*"(?P<version>[^"]+)"'
 [tool.hatch.build.targets.wheel]
 packages = ["src/bkchat_manager"]
 
-[tool.ruff.lint]
-ignore = ["F403", "F405", "UP035", "UP006"]
+[tool.ruff]
+target-version = "py312"
+
+[tool.uv.sources]
+auto-uuid-api-mcdr = { git = "https://github.com/Mooling0602/Auto-UUID-API-MCDR.git" }

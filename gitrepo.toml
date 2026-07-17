@@ -1,0 +1,10 @@
+[meta]
+name = "BukkitChatManager-MCDR"
+author = [{ "github" = "Mooling0602" }]
+maintainers = []
+description = "Manage in-game chat for Bukkit-based Minecraft servers through MCDReforged."
+main-branch = "main"
+license = "GPL-3.0"
+
+[platform]
+remote-hoster = [{ "github" = "https://github.com" }]

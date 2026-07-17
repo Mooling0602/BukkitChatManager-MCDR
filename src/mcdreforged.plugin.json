@@ -7,11 +7,8 @@
     "zh_cn": "接管BukkitAPI服务端的游戏内聊天。"
   },
   "dependencies": {
-    "mcdreforged": ">=2.1.0"
+    "mcdreforged": ">=2.15.0"
   },
   "author": "Mooling0602",
-  "link": "https://github.com/Mooling0602/BukkitChatManager",
-  "resources": [
-    "extra"
-  ]
+  "link": "https://github.com/Mooling0602/BukkitChatManager"
 }
