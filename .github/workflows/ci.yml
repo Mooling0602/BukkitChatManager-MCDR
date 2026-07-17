@@ -1,0 +1,115 @@
+name: CI
+
+"on":
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    name: Check trigger conditions
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.qualify.outputs.should_run }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check commit messages
+        id: qualify
+        shell: python
+        run: |
+          import json
+          import os
+          import re
+          import subprocess
+          from pathlib import Path
+
+          event_name = os.environ["GITHUB_EVENT_NAME"]
+          if event_name == "workflow_dispatch":
+              Path(os.environ["GITHUB_OUTPUT"]).write_text("should_run=true\n", encoding="utf-8")
+              raise SystemExit(0)
+
+          data = json.loads(Path(os.environ["GITHUB_EVENT_PATH"]).read_text(encoding="utf-8"))
+          commits = data.get("commits", [])
+          if not commits and data.get("head_commit"):
+              commits = [data["head_commit"]]
+
+          pattern = re.compile(r"^(?:feat|fix)(?:!\([^)]+\)|\([^)]+\)!|\([^)]+\)|!)?:\s")
+          should_run = False
+          for commit in commits:
+              message = (commit.get("message") or "").splitlines()[0]
+              if pattern.match(message) or "[#build_this]" in message:
+                  should_run = True
+                  break
+              release_match = re.match(r"^release: v(\d+\.\d+\.\d+)$", message)
+              if release_match:
+                  version = release_match.group(1)
+                  tags = subprocess.check_output(
+                      ["git", "tag", "--points-at", os.environ["GITHUB_SHA"]],
+                      text=True,
+                  ).splitlines()
+                  if version in tags:
+                      should_run = True
+                      break
+
+          Path(os.environ["GITHUB_OUTPUT"]).write_text(
+              f"should_run={'true' if should_run else 'false'}\n",
+              encoding="utf-8",
+          )
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    needs: qualify
+    if: needs.qualify.outputs.should_run == 'true'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"  # Sync with pyproject.toml
+
+      - name: Install dependencies
+        run: uv sync --all-groups
+
+      - name: Check code
+        run: uv run ./check.py
+
+  pack:
+    name: Build plugin
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"  # Sync with pyproject.toml
+
+      - name: Install dependencies
+        run: uv sync --all-groups
+
+      - name: Remove stale artifacts
+        run: rm -f ./*.mcdr
+
+      - name: Pack plugin
+        run: uv run mcdreforged pack -i src
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mcdr-plugin
+          path: ./*.mcdr
+          if-no-files-found: error

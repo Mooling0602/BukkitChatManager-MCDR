@@ -1,0 +1,224 @@
+name: PluginCatalogue
+
+"on":
+  workflow_dispatch:
+    inputs:
+      label_information:
+        description: "Information - displays various kinds of information"
+        required: false
+        type: boolean
+        default: false
+      label_tool:
+        description: "Tool - utilities and game assistant plugins"
+        required: false
+        type: boolean
+        default: false
+      label_management:
+        description: "Management - manage server files and other operations"
+        required: false
+        type: boolean
+        default: false
+      label_api:
+        description: "API - provides API or library functionality for other plugins"
+        required: false
+        type: boolean
+        default: false
+      label_handler:
+        description: "Server Handler - provides a custom server handler"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate plugin catalogue info
+        run: |
+          python3 - "$GITHUB_WORKSPACE" "$(
+            python3 -c "
+          import json
+          print(json.dumps({
+              'information': '${{ github.event.inputs.label_information }}',
+              'tool': '${{ github.event.inputs.label_tool }}',
+              'management': '${{ github.event.inputs.label_management }}',
+              'api': '${{ github.event.inputs.label_api }}',
+              'handler': '${{ github.event.inputs.label_handler }}',
+          }))
+          "
+          )" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          workspace = Path(sys.argv[1])
+          dispatch_inputs = json.loads(sys.argv[2])
+
+          with open(workspace / "src/mcdreforged.plugin.json", encoding="utf-8") as f:
+              plugin = json.load(f)
+
+          import tomllib
+          with open(workspace / "gitrepo.toml", "rb") as f:
+              repo = tomllib.load(f)
+
+          meta = repo["meta"]
+          owner = next(a["github"] for a in meta["author"] if "github" in a)
+          base = next(
+              h["github"].rstrip("/")
+              for h in repo["platform"]["remote-hoster"]
+              if "github" in h
+          )
+
+          maintainers = []
+          for m in meta.get("maintainers", []):
+              if isinstance(m, dict) and "github" in m:
+                  maintainers.append({"name": m["github"], "link": f"{base}/{m['github']}"})
+
+          labels = [label_id for label_id, val in dispatch_inputs.items() if val == "true"]
+
+          info = {
+              "id": plugin["id"],
+              "authors": [{"name": owner, "link": f"{base}/{owner}"}],
+              "maintainers": maintainers,
+              "repository": f"{base}/{owner}/{meta['name']}",
+              "branch": meta.get("main-branch", "main"),
+              "labels": labels,
+              "related_path": "src",
+              "introduction": {"zh_cn": "../README.md"},
+          }
+
+          info_path = workspace / "plugin_info.json"
+          info_path.write_text(json.dumps(info, ensure_ascii=False, indent=2), encoding="utf-8")
+          print(f"Generated plugin catalogue info for: {plugin['id']}")
+          PY
+
+      - name: Submit to PluginCatalogue
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "Error: GH_PAT secret is not set." >&2
+            exit 1
+          fi
+
+          plugin_id="$(jq -r '.id' plugin_info.json)"
+          branch="bot/update-${plugin_id}"
+
+          fork_owner="$(gh api user --jq '.login')"
+          echo "Fork owner: $fork_owner"
+
+          gh repo fork MCDReforged/PluginCatalogue \
+            --clone=true
+
+          cd PluginCatalogue
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
+
+          git remote set-url upstream https://github.com/MCDReforged/PluginCatalogue.git 2>/dev/null || \
+            git remote add upstream https://github.com/MCDReforged/PluginCatalogue.git
+          git fetch upstream master
+          git checkout -b "$branch" upstream/master
+
+          mkdir -p "plugins/${plugin_id}"
+          cp "$GITHUB_WORKSPACE/plugin_info.json" "plugins/${plugin_id}/plugin_info.json"
+
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No changes detected for ${plugin_id}, skipping."
+            exit 0
+          fi
+
+          git add "plugins/${plugin_id}/plugin_info.json"
+          git commit -m "Update plugin: ${plugin_id}"
+
+          if git push origin "$branch" 2>/dev/null; then
+            echo "Pushed branch: $branch"
+          else
+            echo "Force pushing branch: $branch"
+            git push --force origin "$branch"
+          fi
+
+          pr_msg_file="$GITHUB_WORKSPACE/doc/PRMessage.md"
+          pr_template_file=".github/pull_request_template.md"
+
+          if [ ! -f "$pr_msg_file" ]; then
+            echo "Error: PR message file not found at $pr_msg_file" >&2
+            exit 1
+          fi
+
+          python3 - "$pr_msg_file" "$pr_template_file" <<'PY' > pr_body.md
+          import sys
+          from pathlib import Path
+
+          msg = Path(sys.argv[1]).read_text(encoding="utf-8")
+          template = Path(sys.argv[2]).read_text(encoding="utf-8")
+          template = template.replace("- [ ]", "- [x]")
+
+          lines = msg.splitlines()
+          title = ""
+          desc_lines = []
+          in_description = False
+
+          for line in lines:
+              if line.startswith("# Pull Request for PluginCatalogue"):
+                  continue
+              if line.startswith("## Description"):
+                  in_description = True
+                  continue
+              if not title and not in_description and line.strip():
+                  title = line.strip()
+                  continue
+              if in_description:
+                  desc_lines.append(line)
+
+          title_file = Path("pr_title.txt")
+          title_file.write_text(title, encoding="utf-8")
+
+          desc = "\n".join(desc_lines).strip()
+          body = desc + "\n\n" + template
+          print(body)
+          PY
+
+          pr_title="$(cat pr_title.txt)"
+
+          create_output="$(gh pr create \
+            --repo MCDReforged/PluginCatalogue \
+            --head "${fork_owner}:${branch}" \
+            --base master \
+            --title "$pr_title" \
+            --body-file pr_body.md 2>&1 || true)"
+
+          if echo "$create_output" | grep -q "already exists"; then
+            existing_pr="$(echo "$create_output" | grep -oP 'https://github\.com/\S+/pull/(\d+)' | grep -oP '\d+$' || true)"
+            if [ -z "$existing_pr" ]; then
+              existing_pr="$(gh pr list \
+                --repo MCDReforged/PluginCatalogue \
+                --search "head:${branch}" \
+                --state open \
+                --json number \
+                --jq 'if . | length > 0 then .[0].number else "" end')"
+            fi
+            if [ -n "$existing_pr" ]; then
+              echo "PR #${existing_pr} already exists, updating."
+              gh pr edit "$existing_pr" \
+                --repo MCDReforged/PluginCatalogue \
+                --title "$pr_title" \
+                --body-file pr_body.md
+            else
+              echo "PR already exists but could not determine its number." >&2
+              exit 1
+            fi
+          elif echo "$create_output" | grep -q "https://github.com"; then
+            echo "Created PR for ${plugin_id}"
+            echo "$create_output"
+          else
+            echo "Unexpected output from gh pr create:" >&2
+            echo "$create_output" >&2
+            exit 1
+          fi

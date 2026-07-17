@@ -1,0 +1,125 @@
+name: Release
+
+"on":
+  push:
+    tags:
+      - "*.*.*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate release commit
+        shell: bash
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          if [[ ! "$tag" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid release tag: $tag" >&2
+            exit 1
+          fi
+
+          subject="$(git log -1 --format=%s)"
+          expected="release: v${tag}"
+          if [[ "$subject" != "$expected" ]]; then
+            echo "Tag ${tag} must point to commit message '${expected}', got '${subject}'." >&2
+            exit 1
+          fi
+
+      - uses: astral-sh/setup-uv@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: uv sync --all-groups
+
+      - name: Build plugin
+        run: |
+          rm -f ./*.mcdr
+          uv run mcdreforged pack -i src
+
+      - name: Prepare release notes
+        shell: bash
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          mapfile -t tags < <(git for-each-ref --sort=creatordate --format='%(refname:strip=2)' refs/tags)
+          tag_count="${#tags[@]}"
+
+          if (( tag_count == 0 )); then
+            echo "No tags found in repository." >&2
+            exit 1
+          fi
+
+          if (( tag_count == 1 )); then
+            compare_link="$(uv run python .github/scripts/get_link.py --compare "$tag")"
+          else
+            current_index=-1
+            for i in "${!tags[@]}"; do
+              if [[ "${tags[i]}" == "$tag" ]]; then
+                current_index="$i"
+                break
+              fi
+            done
+
+            if (( current_index < 0 )); then
+              echo "Current tag '$tag' not found in repository tag list." >&2
+              exit 1
+            fi
+            if (( current_index == 0 )); then
+              echo "Current tag '$tag' has no previous tag in time order." >&2
+              exit 1
+            fi
+
+            previous_tag="${tags[current_index-1]}"
+            compare_link="$(uv run python .github/scripts/get_link.py --compare "$previous_tag" "$tag")"
+          fi
+
+          python - "$tag" "$compare_link" <<'PY' > release-notes.md
+          from pathlib import Path
+          import sys
+
+          tag = sys.argv[1]
+          compare_link = sys.argv[2]
+          lines = Path("doc/CHANGELOG.md").read_text(encoding="utf-8").splitlines()
+
+          section: list[str] = []
+          capture = False
+          found_section = False
+          for line in lines:
+              if line.startswith("## "):
+                  if capture:
+                      break
+                  capture = line[3:].strip() == tag
+                  if capture:
+                      found_section = True
+                  continue
+              if capture:
+                  section.append(line)
+
+          if not found_section:
+              raise SystemExit(f"Missing changelog section for tag {tag!r} in doc/CHANGELOG.md")
+
+          body = "\n".join(
+              line.replace("**#full_changelog**", f"**Full changelog**: {compare_link}")
+              for line in section
+          ).strip()
+
+          print(body)
+          PY
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: v${{ github.ref_name }}
+          body_path: release-notes.md
+          files: ./*.mcdr
