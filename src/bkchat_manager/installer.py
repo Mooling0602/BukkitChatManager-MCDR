@@ -1,3 +1,4 @@
+import contextlib
 import hashlib
 import os
 import re
@@ -13,7 +14,6 @@ from packaging.specifiers import InvalidSpecifier, SpecifierSet
 from packaging.version import InvalidVersion, Version
 
 import bkchat_manager.runtime as rt
-
 
 PLAYERLOG_VERSION = "2.0"
 PLAYERLOG_DOWNLOAD_URL = "https://github.com/Mooling0602/PlayerLog-Bukkit/releases/download/2.0/PlayerLog-2.0.jar"
@@ -109,7 +109,8 @@ def get_server_directory() -> str | None:
         return configured_directory
 
     rt.psi.logger.warning(
-        "MCDR working_directory %s 不是有效的 Bukkit 服务端目录，正在尝试通过服务端 PID 定位。",
+        "MCDR working_directory %s 不是有效的 Bukkit 服务端目录，"
+        "正在尝试通过服务端 PID 定位。",
         configured_directory,
     )
     process_directory = _get_server_process_directory()
@@ -123,7 +124,8 @@ def get_server_directory() -> str | None:
             process_directory,
         )
     rt.psi.logger.error(
-        "无法定位 Bukkit 服务端目录；请手动安装 PlayerLog %s，或在 BukkitChatManager 配置中提供正确的服务端目录位置（该配置项尚未实现）。",
+        "无法定位 Bukkit 服务端目录；请手动安装 PlayerLog %s，"
+        "或在 BukkitChatManager 配置中提供正确的服务端目录位置（该配置项尚未实现）。",
         PLAYERLOG_VERSION,
     )
     return None
@@ -147,7 +149,9 @@ def _get_plugin_version(match: re.Match, file_name: str) -> Version | None:
     try:
         return Version(version_text)
     except InvalidVersion:
-        rt.psi.logger.warning("无法从 Bukkit 插件包 %s 解析版本 %s。", file_name, version_text)
+        rt.psi.logger.warning(
+            "无法从 Bukkit 插件包 %s 解析版本 %s。", file_name, version_text
+        )
         return None
 
 
@@ -202,16 +206,16 @@ def _calculate_sha256(file_path: str) -> str:
     return digest.hexdigest()
 
 
-def _check_plugin_package_hash(
-    plugin_path: str, expected_sha256: str | None
-) -> bool:
+def _check_plugin_package_hash(plugin_path: str, expected_sha256: str | None) -> bool:
     if expected_sha256 is None:
         return True
 
     try:
         actual_sha256 = _calculate_sha256(plugin_path)
     except OSError as error:
-        rt.psi.logger.warning("无法计算 Bukkit 插件包 SHA-256 %s：%s", plugin_path, error)
+        rt.psi.logger.warning(
+            "无法计算 Bukkit 插件包 SHA-256 %s：%s", plugin_path, error
+        )
         return False
 
     if actual_sha256 == expected_sha256:
@@ -231,12 +235,12 @@ def _backup_plugin_package(plugin_path: str) -> bool:
     try:
         os.rename(plugin_path, backup_path)
     except OSError as error:
-        rt.psi.logger.error("无法备份 SHA-256 不匹配的 Bukkit 插件包 %s：%s", plugin_path, error)
+        rt.psi.logger.error(
+            "无法备份 SHA-256 不匹配的 Bukkit 插件包 %s：%s", plugin_path, error
+        )
         return False
 
-    rt.psi.logger.warning(
-        "Bukkit 插件包 SHA-256 不匹配，已备份至 %s。", backup_path
-    )
+    rt.psi.logger.warning("Bukkit 插件包 SHA-256 不匹配，已备份至 %s。", backup_path)
     return True
 
 
@@ -262,11 +266,13 @@ def _find_usable_plugin_package(
                 )
                 continue
 
-        if not _check_plugin_package_hash(package.path, expected_sha256):
-            if force_hash_check:
-                if not _backup_plugin_package(package.path):
-                    raise PluginPackageBackupError(package.path)
-                continue
+        if (
+            not _check_plugin_package_hash(package.path, expected_sha256)
+            and force_hash_check
+        ):
+            if not _backup_plugin_package(package.path):
+                raise PluginPackageBackupError(package.path)
+            continue
 
         return package
 
@@ -304,7 +310,10 @@ def _get_download_status_message() -> str:
         speed_text = f"{_format_size(round(speed))}/s"
 
         if status.total_size is None or status.total_size <= 0:
-            return f"正在下载 PlayerLog {PLAYERLOG_VERSION}：{downloaded}，速度 {speed_text}，预计剩余时间未知"
+            return (
+                f"正在下载 PlayerLog {PLAYERLOG_VERSION}：{downloaded}，"
+                f"速度 {speed_text}，预计剩余时间未知"
+            )
 
         progress = status.downloaded_size / status.total_size * 100
         remaining = max(status.total_size - status.downloaded_size, 0)
@@ -336,9 +345,10 @@ def _download_playerlog(destination: str) -> None:
     temporary_path = f"{destination}.part"
 
     try:
-        with urlopen(PLAYERLOG_DOWNLOAD_URL, timeout=30) as response, open(
-            temporary_path, "wb"
-        ) as output:
+        with (
+            urlopen(PLAYERLOG_DOWNLOAD_URL, timeout=30) as response,
+            open(temporary_path, "wb") as output,
+        ):
             content_length = response.headers.get("Content-Length")
             try:
                 total_size = int(content_length) if content_length is not None else None
@@ -353,9 +363,11 @@ def _download_playerlog(destination: str) -> None:
                     _download_status.downloaded_size += len(chunk)
 
         expected_sha256 = _get_expected_sha256()
-        if not _check_plugin_package_hash(temporary_path, expected_sha256):
-            if rt.config.bukkit_plugin_management.force_hash_check:
-                raise ValueError("下载的 Bukkit 插件包 SHA-256 不匹配")
+        if (
+            not _check_plugin_package_hash(temporary_path, expected_sha256)
+            and rt.config.bukkit_plugin_management.force_hash_check
+        ):
+            raise ValueError("下载的 Bukkit 插件包 SHA-256 不匹配")
 
         os.replace(temporary_path, destination)
         with _download_lock:
@@ -366,11 +378,9 @@ def _download_playerlog(destination: str) -> None:
             "PlayerLog %s 下载完成，请重启服务端以加载 Bukkit 插件。",
             PLAYERLOG_VERSION,
         )
-    except Exception as error:
-        try:
+    except Exception as error:  # noqa: BLE001
+        with contextlib.suppress(OSError):
             os.remove(temporary_path)
-        except OSError:
-            pass
 
         with _download_lock:
             _download_status.active = False
