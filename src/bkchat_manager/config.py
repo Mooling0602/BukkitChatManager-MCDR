@@ -10,6 +10,14 @@ class formatConfig(Serializable):
     left: str = r"§c[-]§r %player%"
 
 
+class playerConfig(Serializable):
+    color: str | None = None
+    is_bold: bool = False
+    is_italic: bool = False
+    is_underlined: bool = False
+    is_strikethrough: bool = False
+
+
 class commandConfig(Serializable):
     feedback: bool = True
     broadcast: bool = False
@@ -25,6 +33,7 @@ class downloadConfig(Serializable):
 
 class mainConfig(Serializable):
     format: formatConfig = formatConfig()
+    player: playerConfig = playerConfig()
     command: commandConfig = commandConfig()
     bukkit_plugin_version_limit: str = ">=2.0"  # empty to disable check
     bukkit_plugin_management: downloadConfig = downloadConfig()
