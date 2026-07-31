@@ -3,6 +3,7 @@ import re
 from mcdreforged.api.all import Info, PluginServerInterface
 
 import bkchat_manager.runtime as rt
+from bkchat_manager.command import command_register
 from bkchat_manager.config import get_config
 from bkchat_manager.installer import install_bukkit_plugin
 
@@ -10,6 +11,7 @@ from bkchat_manager.installer import install_bukkit_plugin
 def on_load(server: PluginServerInterface, _):
     rt.psi = server
     rt.config = get_config(server)
+    command_register(server)
     server.logger.warning(
         "0.3.1以后的版本不再内置Bukkit服务端插件，你需要在新的自动安装器实现之前（即0.4.0以前的版本）手动下载安装到服务端中。"
     )
@@ -51,16 +53,14 @@ def on_user_info(server: PluginServerInterface, info: Info):
             command_format = rt.config.format.command
             if rt.config.command.feedback and not rt.config.command.broadcast:
                 formatted_message = (
-                    command_format
-                    .replace("%src_prefix%", src_prefix)
+                    command_format.replace("%src_prefix%", src_prefix)
                     .replace("%player%", "您")
                     .replace("%message%", message)
                 )
                 server.tell(player, formatted_message)
             if rt.config.command.broadcast:
                 formatted_message = (
-                    command_format
-                    .replace("%src_prefix%", src_prefix)
+                    command_format.replace("%src_prefix%", src_prefix)
                     .replace("%player%", player)
                     .replace("%message%", message)
                 )
@@ -80,16 +80,14 @@ def on_info(server: PluginServerInterface, info: Info):
         command_format = rt.config.format.command
         if rt.config.command.feedback and not rt.config.command.broadcast:
             formatted_message = (
-                command_format
-                .replace("%src_prefix%", src_prefix)
+                command_format.replace("%src_prefix%", src_prefix)
                 .replace("%player%", "您")
                 .replace("%message%", command)
             )
             server.tell(player, formatted_message)
         if rt.config.command.broadcast:
             formatted_message = (
-                command_format
-                .replace("%src_prefix%", src_prefix)
+                command_format.replace("%src_prefix%", src_prefix)
                 .replace("%player%", player)
                 .replace("%message%", command)
             )

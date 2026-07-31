@@ -14,6 +14,7 @@ from packaging.specifiers import InvalidSpecifier, SpecifierSet
 from packaging.version import InvalidVersion, Version
 
 import bkchat_manager.runtime as rt
+from bkchat_manager.command import builder
 
 PLAYERLOG_VERSION = "2.0"
 PLAYERLOG_DOWNLOAD_URL = "https://github.com/Mooling0602/PlayerLog-Bukkit/releases/download/2.0/PlayerLog-2.0.jar"
@@ -331,8 +332,9 @@ def _get_download_status_message() -> str:
     return "当前没有 PlayerLog 下载任务。"
 
 
-def on_download_status_command(source: CommandSource) -> None:
-    source.reply(_get_download_status_message())
+@builder.command("!!bcm dl status")
+def on_download_status_command(src: CommandSource) -> None:
+    src.reply(_get_download_status_message())
 
 
 def _on_duplicate_download(destination: str) -> None:
@@ -417,6 +419,7 @@ def download_playerlog_plugin(server_directory: str) -> bool:
         task_id = _download_status.task_id
 
     rt.psi.logger.info("开始下载 PlayerLog %s：%s", PLAYERLOG_VERSION, destination)
+    rt.psi.logger.info("使用 !!bcm dl status 命令查看下载进度。")
     _report_download_progress(task_id)
     _download_playerlog(destination)
     return True
